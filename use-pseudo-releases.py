@@ -7,11 +7,13 @@ PLUGIN_API_VERSIONS = ['0.12', '0.15', '0.16', '1.1']
 from picard.metadata import register_album_metadata_processor, register_track_metadata_processor
 from picard.album import Album
 from picard.util import partial
-from picard.mbxml import release_to_metadata
+from picard.mbxml import release_to_metadata, artist_credit_from_node
 from PyQt4.QtCore import QUrl
+from picard.config import Config
 
 script = "Latn"
 tracks = {}
+config = Config()
 
 def _pseudo_release_downloaded(album, metadata, original_id, document, http, error):
 	global tracks
@@ -31,14 +33,7 @@ def _pseudo_release_downloaded(album, metadata, original_id, document, http, err
 				metadata["album"] = album_latin
 				tracks['album'] = album_latin
 
-				artistcredit = ""
-				for e in release_node.artist_credit[0].name_credit:
-					if hasattr(e, "name"):
-						artistcredit = artistcredit + e.name[0].text
-					else:
-						artistcredit = artistcredit + e.artist[0].name[0].text
-					if hasattr(e, "joinphrase"):
-						artistcredit = artistcredit + e.joinphrase
+				artistcredit, tmp = artist_credit_from_node(release_node.artist_credit[0], config)
 				metadata["albumartist"] = artistcredit
 				tracks["artist"] = artistcredit
 
@@ -59,19 +54,11 @@ def _pseudo_release_downloaded(album, metadata, original_id, document, http, err
 							title = node.recording[0].title[0].text
 
 						tartist = ""
-						ac = []
 						try:
-							ac = node.artist_credit[0].name_credit
+							tartist, tmp = artist_credit_from_node(node.artist_credit[0], config)
 						except:
-							ac = node.recording[0].artist_credit[0].name_credit
+							tartist, tmp = artist_credit_from_node(node.recording[0].artist_credit[0], config)
 
-						for e in ac:
-							if hasattr(e, "name"):
-								tartist += e.name[0].text
-							else:
-								tartist += e.artist[0].name[0].text
-							if hasattr(e, "joinphrase"):
-								tartist += e.joinphrase
 						tracks[ mediumpos ][ trackpos ] = {};
 						tracks[ mediumpos ][ trackpos ]["artist"] = tartist
 
@@ -80,7 +67,6 @@ def _pseudo_release_downloaded(album, metadata, original_id, document, http, err
 
 						trackpos = trackpos + 1
 					mediumpos = mediumpos + 1
-
 			except:
 				error = True
 				album.log.error("some error occurred :(")
@@ -98,8 +84,6 @@ def fetch_transliterations(album, metadata, release_node):
 			for relation_list in release_node.relation_list:
 				if relation_list.target_type == 'release':
 					for relation in relation_list.relation:
-#						if hasattr(relation, 'attribute_list'):
-#							print relation.attribute_list[0].attribute[0].text
 						try:
 							direction = relation.direction if hasattr(relation, 'direction') else ''
 							if (relation.type == 'transl-tracklisting' and direction != 'backward'):
@@ -110,7 +94,6 @@ def fetch_transliterations(album, metadata, release_node):
 						except AttributeError: pass
 
 register_album_metadata_processor(fetch_transliterations)
-
 
 def set_transliterations(tagger, metadata, track, release):
 	global tracks
