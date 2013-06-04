@@ -1,6 +1,6 @@
-PLUGIN_NAME = 'Fetch latin script tracklists from pseudo-releases'
+PLUGIN_NAME = 'Fetch latin script tracklists using translation/transliteration relationships'
 PLUGIN_AUTHOR = ''
-PLUGIN_DESCRIPTION = '''Fetch latin script tracklists from pseudo-releases'''
+PLUGIN_DESCRIPTION = '''Fetch latin script tracklists using translation/transliteration relationships'''
 PLUGIN_VERSION = '0.1'
 PLUGIN_API_VERSIONS = ['0.12', '0.15', '0.16', '1.1']
 
