@@ -2,7 +2,7 @@ PLUGIN_NAME = 'NFC/NFD functions'
 PLUGIN_AUTHOR = ''
 PLUGIN_DESCRIPTION = 'Adds $nfc(text) and $nfd(text) functions for converting strings to NFC or NFD'
 PLUGIN_VERSION = "0.1"
-PLUGIN_API_VERSIONS = ["1.0"]
+PLUGIN_API_VERSIONS = ["1.0", "2.0", "2.1", "2.2", "2.3", "2.4", "2.5", "2.6", "2.7"]
 
 from picard.script import register_script_function
 import unicodedata
